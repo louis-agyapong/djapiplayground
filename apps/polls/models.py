@@ -13,7 +13,7 @@ class Poll(models.Model):
 
 
 class Choice(models.Model):
-    poll = models.ForeignKey("Poll", verbose_name=_(""), on_delete=models.CASCADE)
+    poll = models.ForeignKey("Poll", verbose_name=_("Poll"), on_delete=models.CASCADE)
     choice_text = models.CharField(_("Choice Text"), max_length=100)
 
     def __str__(self) -> str:
