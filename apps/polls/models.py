@@ -1,6 +1,6 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User
 
 
 class Poll(models.Model):
@@ -13,9 +13,10 @@ class Poll(models.Model):
 
 
 class Choice(models.Model):
-    poll = models.ForeignKey("Poll", verbose_name=_("Poll"), on_delete=models.CASCADE, related_name="polls")
+    poll = models.ForeignKey(
+        "Poll", verbose_name=_("Poll"), on_delete=models.CASCADE, related_name="choices"
+    )
     choice_text = models.CharField(_("Choice Text"), max_length=100)
-    votes = models.IntegerField(_("Votes"), default=0)
 
     def __str__(self) -> str:
         return self.choice_text

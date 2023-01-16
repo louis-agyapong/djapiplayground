@@ -32,22 +32,32 @@ class CreateVote(APIView):
     serializer_class = VoteSerializer
     permission_classes = [IsAuthenticated]
 
-
     def post(self, request, pk, choice_pk):
-        voted_by = request.data.get("voted_by")
-        data = {"choice": choice_pk, "poll": pk, "voted_by": voted_by}
-        serializer = VoteSerializer(data=data)
+        # Check if the poll exists
+        poll = get_object_or_404(Poll, pk=pk)
+
+        # Check if the choice exists
+        choice = get_object_or_404(Choice, pk=choice_pk)
+
+        # Check if the choice belongs to the poll
+        if choice.poll != poll:
+            return Response(
+                {"error": "Choice does not belong to the poll."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Check if the user already voted for the poll
         try:
-            vote = Vote.objects.get(poll=pk, voted_by=voted_by)
+            Vote.objects.get(poll=pk, choice=choice_pk, voted_by=request.user)
             return Response(
                 {"error": "You have already voted for this poll."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Vote.DoesNotExist:
+            data = {"choice": choice_pk, "poll": pk, "voted_by": request.user.id}
             serializer = VoteSerializer(data=data)
+
             if serializer.is_valid():
-                vote = serializer.save()
-                vote.votes += 1
-                vote.save()
+                serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
