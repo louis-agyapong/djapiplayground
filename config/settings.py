@@ -1,9 +1,9 @@
 import warnings
 from pathlib import Path
 
+import dj_database_url
 from decouple import Csv, config
 from django.core.management.utils import get_random_secret_key
-import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     # External apps
     "django_extensions",
     "rest_framework",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -59,7 +60,7 @@ CONTEXT_PROCESSORS: list[str] = [
     "django.contrib.messages.context_processors.messages",
 ]
 
-TEMPLATE_DIRS:list = [str(BASE_DIR / "templates")]
+TEMPLATE_DIRS: list = [str(BASE_DIR / "templates")]
 
 TEMPLATES = [
     {
@@ -117,3 +118,11 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+}
