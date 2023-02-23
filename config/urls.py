@@ -5,4 +5,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("apps.polls.urls")),
     path("watchlist/", include("apps.watchlist.urls")),
+    path("watchlist/api/", include("apps.watchlist.api.urls")),
 ]
