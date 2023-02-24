@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.watchlist import views
+from apps.watchlist.api import views
 
 
 urlpatterns = [
