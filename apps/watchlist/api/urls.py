@@ -4,6 +4,6 @@ from apps.watchlist.api import views
 
 
 urlpatterns = [
-    path("movies/", views.movie_list, name="list"),
-    path("movies/<int:pk>/", views.movie_detail, name="detail"),
+    path("movies/", views.MovieListAPIView.as_view(), name="list"),
+    path("movies/<int:pk>/", views.MovieDetailAPIView.as_view(), name="detail"),
 ]
