@@ -59,23 +59,32 @@ class MovieListAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = MovieSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        name = request.data.get("name")
+        description = request.data.get("description")
+        active = request.data.get("active")
+        movie_data = Movie.objects.create(name=name, description=description, active=active)
+        serializer = MovieSerializer(movie_data)
+        if serializer:
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MovieDetailAPIView(APIView):
     def get(self, request, pk):
-        try:
-            movie = Movie.objects.get(pk=pk)
-        except Movie.DoesNotExist:
-            return Response({"Error": "Movie not found"}, status=status.HTTP_404_NOT_FOUND)
+        movie = Movie.objects.filter(pk=pk).first()
         serializer = MovieSerializer(movie)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
+        name = request.data.get("name")
+        description = request.data.get("description")
+
+        if name == description:
+            return Response(
+                {"Error": "Name or description must not be the same"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
             movie = Movie.objects.get(pk=pk)
         except Movie.DoesNotExist:
