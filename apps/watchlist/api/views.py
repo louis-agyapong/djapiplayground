@@ -1,4 +1,3 @@
-from django.http import Http404
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -7,6 +6,7 @@ from rest_framework.views import APIView
 from apps.watchlist.models import Movie
 
 from .serializers import MovieSerializer
+from .utils import validate_name_and_description
 
 
 @api_view(["GET", "POST"])
@@ -62,6 +62,12 @@ class MovieListAPIView(APIView):
         name = request.data.get("name")
         description = request.data.get("description")
         active = request.data.get("active")
+
+        error_response = validate_name_and_description(name, description)
+
+        if error_response is not None:
+            return error_response
+
         movie_data = Movie.objects.create(name=name, description=description, active=active)
         serializer = MovieSerializer(movie_data)
         if serializer:
@@ -79,11 +85,10 @@ class MovieDetailAPIView(APIView):
         name = request.data.get("name")
         description = request.data.get("description")
 
-        if name == description:
-            return Response(
-                {"Error": "Name or description must not be the same"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        error_response = validate_name_and_description(name, description)
+
+        if error_response is not None:
+            return error_response
 
         try:
             movie = Movie.objects.get(pk=pk)
