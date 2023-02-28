@@ -3,10 +3,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.watchlist.models import Movie
+from apps.watchlist.models import Movie, StreamingPlatform
 
-from .serializers import MovieSerializer
-from .utils import validate_name_and_description
+from .serializers import MovieSerializer, StreamingPlatformSerializer
+from .utils import validate_title_and_description
 
 
 @api_view(["GET", "POST"])
@@ -59,16 +59,16 @@ class MovieListAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        name = request.data.get("name")
+        title = request.data.get("title")
         description = request.data.get("description")
         active = request.data.get("active")
 
-        error_response = validate_name_and_description(name, description)
+        error_response = validate_title_and_description(title, description)
 
         if error_response is not None:
             return error_response
 
-        movie_data = Movie.objects.create(name=name, description=description, active=active)
+        movie_data = Movie.objects.create(title=title, description=description, active=active)
         serializer = MovieSerializer(movie_data)
         if serializer:
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -82,10 +82,10 @@ class MovieDetailAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
-        name = request.data.get("name")
+        title = request.data.get("title")
         description = request.data.get("description")
 
-        error_response = validate_name_and_description(name, description)
+        error_response = validate_title_and_description(title, description)
 
         if error_response is not None:
             return error_response
@@ -107,3 +107,17 @@ class MovieDetailAPIView(APIView):
             return Response({"Error": "Movie not found"}, status=status.HTTP_404_NOT_FOUND)
         movie.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class StreamingListPIVeiw(APIView):
+    def get(self, request):
+        platform = StreamingPlatform.objects.all()
+        serializer = StreamingPlatformSerializer(platform, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = StreamingPlatformSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

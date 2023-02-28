@@ -1,6 +1,7 @@
+from django.http import Http404, JsonResponse
 from django.shortcuts import render
+
 from .models import Movie
-from django.http import JsonResponse, Http404
 
 
 def movie_list(request):
@@ -17,7 +18,7 @@ def movie_detail(request, pk):
     except Movie.DoesNotExist:
         raise Http404("Movie does not exist")
     data = {
-        "name": movie.name,
+        "name": movie.title,
         "description": movie.description,
         "active": movie.active,
     }
