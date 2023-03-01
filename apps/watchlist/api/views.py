@@ -109,7 +109,7 @@ class MovieDetailAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class StreamingListPIVeiw(APIView):
+class StreamListPIVeiw(APIView):
     def get(self, request):
         platform = StreamingPlatform.objects.all()
         serializer = StreamingPlatformSerializer(platform, many=True)
@@ -117,6 +117,31 @@ class StreamingListPIVeiw(APIView):
 
     def post(self, request):
         serializer = StreamingPlatformSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StreamDetailAPIVeiw(APIView):
+    def get(self, request, pk):
+        try:
+            platform = StreamingPlatform.objects.get(pk=pk)
+        except StreamingPlatform.DoesNotExist:
+            return Response(
+                {"Error": "Streaming Platform not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = StreamingPlatformSerializer(platform)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        try:
+            platform = StreamingPlatform.objects.get(pk=pk)
+        except StreamingPlatform.DoesNotExist:
+            return Response(
+                {"Error": "Streaming Platform not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = StreamingPlatformSerializer(platform, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

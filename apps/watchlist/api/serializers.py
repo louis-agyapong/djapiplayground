@@ -19,6 +19,8 @@ class MovieSerializer(serializers.ModelSerializer):
 
 
 class StreamingPlatformSerializer(serializers.ModelSerializer):
+    movies = MovieSerializer(many=True, read_only=True)
+
     class Meta:
         model = StreamingPlatform
         fields = "__all__"
