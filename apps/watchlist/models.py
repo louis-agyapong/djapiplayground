@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -27,3 +28,19 @@ class Movie(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class Review(models.Model):
+    movie = models.ForeignKey(
+        Movie, verbose_name=_("Movie"), on_delete=models.CASCADE, related_name="reviews"
+    )
+    rating = models.PositiveIntegerField(
+        _("Rating"), validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    description = models.TextField(_("Description"), blank=True, default="")
+    created = models.DateTimeField(_("Create At"), auto_now_add=True)
+    updated = models.DateTimeField(_("Updatd At"), auto_now=True)
+    active = models.BooleanField(_("Active"), default=True)
+
+    def __str__(self) -> str:
+        return str(self.rating)
