@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -31,6 +32,7 @@ class Movie(models.Model):
 
 
 class Review(models.Model):
+    review_user = models.ForeignKey(User, verbose_name=_("Review User"), on_delete=models.CASCADE)
     movie = models.ForeignKey(
         Movie, verbose_name=_("Movie"), on_delete=models.CASCADE, related_name="reviews"
     )
@@ -43,4 +45,4 @@ class Review(models.Model):
     active = models.BooleanField(_("Active"), default=True)
 
     def __str__(self) -> str:
-        return f"Movie: {self.movie.title} Rating: {str(self.rating)}" 
+        return f"Movie: {self.movie.title} Rating: {str(self.rating)}"

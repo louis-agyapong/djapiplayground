@@ -1,12 +1,14 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.watchlist.models import Movie, Review, StreamingPlatform
 
 from .serializers import MovieSerializer, ReviewSerializer, StreamingPlatformSerializer
-from .utils import validate_title_and_description
+from .utils import has_reviewed_movie, validate_title_and_description
 
 
 @api_view(["GET", "POST"])
@@ -201,15 +203,25 @@ class MovieReviewList(APIView):
 
 class ReviewCreate(APIView):
     def post(self, request, pk):
-        movie = Movie.objects.filter(pk=pk).first()
+        movie = get_object_or_404(Movie, pk=pk)
+        review_user = self.request.user
         rating = request.data.get("rating")
         description = request.data.get("description")
         active = request.data.get("active")
 
-        review = Review.objects.create(
-            movie=movie, rating=rating, description=description, active=active
-        )
-        serializer = ReviewSerializer(review)
-        if serializer:
+        if has_reviewed_movie(movie, review_user):
+            raise ValidationError("You have already reviewed this movie.")
+
+        data = {
+            "movie": movie.pk,
+            "rating": rating,
+            "description": description,
+            "active": active,
+            "review_user": review_user.pk,
+        }
+
+        serializer = ReviewSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save(movie=movie, review_user=review_user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
