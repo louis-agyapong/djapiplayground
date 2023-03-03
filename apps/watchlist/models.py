@@ -43,4 +43,4 @@ class Review(models.Model):
     active = models.BooleanField(_("Active"), default=True)
 
     def __str__(self) -> str:
-        return str(self.rating)
+        return f"Movie: {self.movie.title} Rating: {str(self.rating)}" 

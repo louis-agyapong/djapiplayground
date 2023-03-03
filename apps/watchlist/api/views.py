@@ -19,7 +19,7 @@ def movie_list(request):
         serializer = MovieSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -71,7 +71,7 @@ class MovieListAPIView(APIView):
         movie_data = Movie.objects.create(title=title, description=description, active=active)
         serializer = MovieSerializer(movie_data)
         if serializer:
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -119,7 +119,7 @@ class StreamListPIVeiw(APIView):
         serializer = StreamingPlatformSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -168,7 +168,7 @@ class ReviewListAPIView(APIView):
         serializer = ReviewSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -190,3 +190,26 @@ class ReviewDetailAPIView(APIView):
         review = Review.objects.filter(pk=pk).first()
         review.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class MovieReviewList(APIView):
+    def get(self, request, pk):
+        movie_review = Review.objects.filter(movie=pk)
+        serializer = ReviewSerializer(movie_review, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ReviewCreate(APIView):
+    def post(self, request, pk):
+        movie = Movie.objects.filter(pk=pk).first()
+        rating = request.data.get("rating")
+        description = request.data.get("description")
+        active = request.data.get("active")
+
+        review = Review.objects.create(
+            movie=movie, rating=rating, description=description, active=active
+        )
+        serializer = ReviewSerializer(review)
+        if serializer:
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

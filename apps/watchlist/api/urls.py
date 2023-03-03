@@ -10,4 +10,6 @@ urlpatterns = [
     path("movie/stream/<int:pk>/", views.StreamDetailAPIVeiw.as_view(), name="stream_detail"),
     path("movie/review/", views.ReviewListAPIView.as_view(), name="review_list"),
     path("movie/review/<int:pk>/", views.ReviewDetailAPIView.as_view(), name="review_detail"),
+    path("movie/<int:pk>/review/", views.MovieReviewList.as_view(), name="movie_reviews"),
+    path("movie/<int:pk>/review-create/", views.ReviewCreate.as_view(), name="review_create"),
 ]
