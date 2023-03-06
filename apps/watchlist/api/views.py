@@ -2,10 +2,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.watchlist.models import Movie, Review, StreamingPlatform
+from apps.watchlist.api.permissions import ReviewUserOrReadOnly, AdminOrReadOnly
 
 from .serializers import MovieSerializer, ReviewSerializer, StreamingPlatformSerializer
 from .utils import has_reviewed_movie, validate_title_and_description
@@ -161,6 +163,8 @@ class StreamDetailAPIVeiw(APIView):
 
 
 class ReviewListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         review = Review.objects.all()
         serializer = ReviewSerializer(review, many=True)
@@ -175,6 +179,8 @@ class ReviewListAPIView(APIView):
 
 
 class ReviewDetailAPIView(APIView):
+    permission_classes = [ReviewUserOrReadOnly]
+
     def get(self, request, pk):
         review = Review.objects.filter(pk=pk).first()
         serializer = ReviewSerializer(review)
