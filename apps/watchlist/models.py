@@ -25,6 +25,8 @@ class Movie(models.Model):
         null=True,
     )
     active = models.BooleanField(_("Active"), default=True)
+    average_rating = models.FloatField(_("Average Rating"), default=0)
+    num_rating = models.IntegerField(_("Number of Rating"), default=0)
     created = models.DateTimeField(_("Created"), auto_now_add=True)
 
     def __str__(self) -> str:

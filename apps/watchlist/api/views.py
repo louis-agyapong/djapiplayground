@@ -113,7 +113,7 @@ class MovieDetailAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class StreamListPIVeiw(APIView):
+class PlatformListPIView(APIView):
     def get(self, request):
         platform = StreamingPlatform.objects.all()
         serializer = StreamingPlatformSerializer(platform, many=True)
@@ -127,7 +127,7 @@ class StreamListPIVeiw(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class StreamDetailAPIVeiw(APIView):
+class PlatformDetailAPIVeiw(APIView):
     def get(self, request, pk):
         try:
             platform = StreamingPlatform.objects.get(pk=pk)
@@ -218,16 +218,26 @@ class ReviewCreate(APIView):
         if has_reviewed_movie(movie, review_user):
             raise ValidationError("You have already reviewed this movie.")
 
+
         data = {
             "movie": movie.pk,
             "rating": rating,
             "description": description,
+            "average_rating": movie.average_rating,
+            "num_rating": movie.average_rating,
             "active": active,
             "review_user": review_user.pk,
         }
 
         serializer = ReviewSerializer(data=data)
         if serializer.is_valid():
+            if movie.num_rating == 0:
+                movie.average_rating = serializer.validated_data["rating"]
+            else:
+                movie.average_rating = (movie.average_rating + serializer.validated_data["rating"]) / 2
+
+            movie.num_rating = movie.num_rating + 1
+            movie.save()
             serializer.save(movie=movie, review_user=review_user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
