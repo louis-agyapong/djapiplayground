@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 
-class RegistrationSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
 
     class Meta:
@@ -12,14 +12,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
             "password": {"write_only": True},
         }
 
+    def validate(self, data):
+        if data["password"] != data["password2"]:
+            raise serializers.ValidationError("The passwords do not match.")
+        return data
+
     def create(self, validated_data):
         password = validated_data["password"]
-        password2 = validated_data["password2"]
-
-        if password != password2:
-            raise serializers.ValidationError(
-                {"error": "Password1 and Password2 should be the same"}
-            )
 
         if User.objects.filter(email=validated_data["email"]).exists():
             raise serializers.ValidationError({"error": "Email already exists"})

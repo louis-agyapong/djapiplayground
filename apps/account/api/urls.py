@@ -5,5 +5,5 @@ from apps.account.api import views
 
 urlpatterns = [
     path("login/", obtain_auth_token, name="login"),
-    path("register/", views.registration_view, name="register"),
+    path("register/", views.register_view, name="register"),
 ]

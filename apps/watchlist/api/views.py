@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+
 from apps.watchlist.models import Movie, Review, StreamingPlatform
 from apps.watchlist.api.permissions import ReviewUserOrReadOnly
 
@@ -218,7 +219,6 @@ class ReviewCreate(APIView):
         if has_reviewed_movie(movie, review_user):
             raise ValidationError("You have already reviewed this movie.")
 
-
         data = {
             "movie": movie.pk,
             "rating": rating,
@@ -234,7 +234,9 @@ class ReviewCreate(APIView):
             if movie.num_rating == 0:
                 movie.average_rating = serializer.validated_data["rating"]
             else:
-                movie.average_rating = (movie.average_rating + serializer.validated_data["rating"]) / 2
+                movie.average_rating = (
+                    movie.average_rating + serializer.validated_data["rating"]
+                ) / 2
 
             movie.num_rating = movie.num_rating + 1
             movie.save()
