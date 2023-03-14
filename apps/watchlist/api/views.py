@@ -6,9 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-
-from apps.watchlist.models import Movie, Review, StreamingPlatform
 from apps.watchlist.api.permissions import ReviewUserOrReadOnly
+from apps.watchlist.models import Movie, Review, StreamingPlatform
 
 from .serializers import MovieSerializer, ReviewSerializer, StreamingPlatformSerializer
 from .utils import has_reviewed_movie, validate_title_and_description
@@ -82,7 +81,10 @@ class MovieListAPIView(APIView):
 
 class MovieDetailAPIView(APIView):
     def get(self, request, pk):
-        movie = Movie.objects.filter(pk=pk).first()
+        try:
+            movie = Movie.objects.get(pk=pk)
+        except Movie.DoesNotExist:
+            return Response({"Error": "Movie not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = MovieSerializer(movie)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -183,12 +185,18 @@ class ReviewDetailAPIView(APIView):
     permission_classes = [ReviewUserOrReadOnly]
 
     def get(self, request, pk):
-        review = Review.objects.filter(pk=pk).first()
+        try:
+            review = Review.objects.get(pk=pk)
+        except Review.DoesNotExist:
+            return Response({"Error": "Review not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = ReviewSerializer(review)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
-        review = Review.objects.filter(pk=pk).first()
+        try:
+            review = Review.objects.get(pk=pk)
+        except Review.DoesNotExist:
+            return Response({"Error": "Review not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = ReviewSerializer(review, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -196,12 +204,17 @@ class ReviewDetailAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        review = Review.objects.filter(pk=pk).first()
+        try:
+            review = Review.objects.get(pk=pk)
+        except Review.DoesNotExist:
+            return Response({"Error": "Review not found"}, status=status.HTTP_404_NOT_FOUND)
         review.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class MovieReviewList(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, pk):
         movie_review = Review.objects.filter(movie=pk)
         serializer = ReviewSerializer(movie_review, many=True)
