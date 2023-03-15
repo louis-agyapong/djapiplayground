@@ -268,4 +268,13 @@ class UserReview(generics.ListAPIView):
 
     def get_queryset(self):
         username = self.kwargs["username"]
+        # username = self.request.user
         return Review.objects.filter(review_user__username=username)
+
+
+@api_view(["GET"])
+def user_review(request, username):
+    if request.method == "GET":
+        reviews = Review.objects.filter(review_user__username=username)
+        serializer = ReviewSerializer(reviews, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

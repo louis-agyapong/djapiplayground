@@ -13,4 +13,5 @@ urlpatterns = [
     path("movie/<int:pk>/review/", views.MovieReviewList.as_view(), name="movie_reviews"),
     path("movie/<int:pk>/review-create/", views.ReviewCreate.as_view(), name="review_create"),
     path("movie/reviews/<str:username>/", views.UserReview.as_view(), name="user-review-detail")
+    # path("movie/reviews/<str:username>/", views.user_review, name="user-review-detail")
 ]
