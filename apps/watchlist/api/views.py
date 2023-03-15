@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -168,7 +168,7 @@ class PlatformDetailAPIVeiw(APIView):
 
 class ReviewListAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    throttle_classes = [ReviewListThrottling]
+    # throttle_classes = [ReviewListThrottling]
 
     def get(self, request):
         review = Review.objects.all()
@@ -216,7 +216,7 @@ class ReviewDetailAPIView(APIView):
 
 class MovieReviewList(APIView):
     # permission_classes = [IsAuthenticated]
-    throttle_classes = [ReviewListThrottling]
+    # throttle_classes = [ReviewListThrottling]
 
     def get(self, request, pk):
         movie_review = Review.objects.filter(movie=pk)
@@ -225,7 +225,7 @@ class MovieReviewList(APIView):
 
 
 class ReviewCreate(APIView):
-    throttle_classes = [ReviewCreateThrottling]
+    # throttle_classes = [ReviewCreateThrottling]
 
     def post(self, request, pk):
         movie = get_object_or_404(Movie, pk=pk)
@@ -261,3 +261,11 @@ class ReviewCreate(APIView):
             serializer.save(movie=movie, review_user=review_user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserReview(generics.ListAPIView):
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        username = self.kwargs["username"]
+        return Review.objects.filter(review_user__username=username)

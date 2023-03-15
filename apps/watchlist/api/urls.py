@@ -12,5 +12,5 @@ urlpatterns = [
     path("movie/review/<int:pk>/", views.ReviewDetailAPIView.as_view(), name="review_detail"),
     path("movie/<int:pk>/review/", views.MovieReviewList.as_view(), name="movie_reviews"),
     path("movie/<int:pk>/review-create/", views.ReviewCreate.as_view(), name="review_create"),
-    # path("api-auth/", include("rest_framework.urls")),
+    path("movie/reviews/<str:username>/", views.UserReview.as_view(), name="user-review-detail")
 ]
