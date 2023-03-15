@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.account.api.throttling import ReviewCreateThrottling, ReviewListThrottling
 from apps.watchlist.api.permissions import ReviewUserOrReadOnly
 from apps.watchlist.models import Movie, Review, StreamingPlatform
 
@@ -167,6 +168,7 @@ class PlatformDetailAPIVeiw(APIView):
 
 class ReviewListAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ReviewListThrottling]
 
     def get(self, request):
         review = Review.objects.all()
@@ -213,7 +215,8 @@ class ReviewDetailAPIView(APIView):
 
 
 class MovieReviewList(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    throttle_classes = [ReviewListThrottling]
 
     def get(self, request, pk):
         movie_review = Review.objects.filter(movie=pk)
@@ -222,6 +225,8 @@ class MovieReviewList(APIView):
 
 
 class ReviewCreate(APIView):
+    throttle_classes = [ReviewCreateThrottling]
+
     def post(self, request, pk):
         movie = get_object_or_404(Movie, pk=pk)
         review_user = self.request.user
