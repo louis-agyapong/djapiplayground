@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
@@ -167,7 +168,7 @@ class PlatformDetailAPIVeiw(APIView):
 
 
 class ReviewListAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     # throttle_classes = [ReviewListThrottling]
 
     def get(self, request):
@@ -214,14 +215,28 @@ class ReviewDetailAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class MovieReviewList(APIView):
+# class MovieReviewList(APIView):
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_fields = ["review_user__username", "active "]
+#     # permission_classes = [IsAuthenticated]
+#     # throttle_classes = [ReviewListThrottling]
+
+#     def get(self, request, pk):
+#         movie_review = Review.objects.filter(movie=pk)
+#         serializer = ReviewSerializer(movie_review, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MovieReviewList(generics.ListAPIView):
+    serializer_class = ReviewSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["review_user__username", "active"]
     # permission_classes = [IsAuthenticated]
     # throttle_classes = [ReviewListThrottling]
 
-    def get(self, request, pk):
-        movie_review = Review.objects.filter(movie=pk)
-        serializer = ReviewSerializer(movie_review, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        pk = self.kwargs["pk"]
+        return Review.objects.filter(movie=pk)
 
 
 class ReviewCreate(APIView):
@@ -273,7 +288,7 @@ class UserReview(generics.ListAPIView):
 
     def get_queryset(self):
         """
-        Filtering against a query param in the URL  
+        Filtering against a query param in the URL
         """
         username = self.request.query_params.get("username", None)
         # username = self.request.user
